@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import threading
 import time
 from datetime import datetime
@@ -80,7 +81,12 @@ def api_spreads():
 def main() -> None:
     parser = argparse.ArgumentParser(description="김프 웹 대시보드")
     parser.add_argument("--host", default="0.0.0.0")
-    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=int(os.environ.get("PORT", 8000)),
+        help="포트 (env PORT 우선)",
+    )
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
     app.run(host=args.host, port=args.port, debug=args.debug)

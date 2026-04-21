@@ -11,13 +11,43 @@
 pip install -r requirements.txt
 ```
 
-## 실행
+## 배포 (퍼블릭 URL)
 
-### 웹 대시보드
+저장소에 `render.yaml`, `Procfile`, `Dockerfile`이 포함되어 있어 주요 PaaS에서
+설정 없이 바로 배포된다.
+
+### Render (가장 쉬움, 무료)
+
+1. <https://render.com> 로그인 → **New +** → **Blueprint**
+2. 이 GitHub 저장소 선택 → Apply
+3. 수 분 후 `https://<서비스명>.onrender.com` URL 부여
+
+### Railway
+
+1. <https://railway.app> → **New Project** → **Deploy from GitHub**
+2. 이 저장소 선택 → `Procfile` 자동 감지
+3. **Settings → Networking → Generate Domain**
+
+### Fly.io (CLI)
+
+```bash
+curl -L https://fly.io/install.sh | sh
+flyctl auth signup        # 또는 login
+flyctl launch --now       # Dockerfile 자동 감지, 배포
+```
+
+### Google Cloud Run
+
+```bash
+gcloud run deploy coin-arbitrage --source . --region=asia-northeast3 --allow-unauthenticated
+```
+
+### 로컬 실행
 
 ```bash
 python app.py                 # http://localhost:8000
 python app.py --port 8080     # 포트 변경
+gunicorn app:app              # 프로덕션 WSGI (Procfile 과 동일)
 ```
 
 브라우저에서 접속하면 김프/역프 테이블이 자동 새로고침된다.
