@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>김프 모니터 — Upbit vs Binance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0e1116;
+      --panel: #161b22;
+      --border: #2a313c;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --kimp: #2ea043;
+      --reverse: #f85149;
+      --accent: #58a6ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    header h1 { margin: 0; font-size: 18px; }
+    .status { color: var(--muted); font-size: 13px; }
+    .controls {
+      margin-left: auto;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .controls label { color: var(--muted); font-size: 13px; }
+    .controls input, .controls select {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 13px;
+    }
+    main { padding: 16px 20px; }
+    .warning {
+      background: #4a2e05;
+      border: 1px solid #8b6508;
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      font-size: 13px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    th, td { padding: 8px 12px; text-align: right; border-bottom: 1px solid var(--border); }
+    th:first-child, td:first-child { text-align: left; }
+    th:nth-child(2), td:nth-child(2) { text-align: center; }
+    th {
+      background: #1c2128;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      user-select: none;
+    }
+    th:hover { color: var(--text); }
+    tbody tr:hover { background: #1c2128; }
+    .dir-KIMP { color: var(--kimp); font-weight: 600; }
+    .dir-REVERSE { color: var(--reverse); font-weight: 600; }
+    .num { font-variant-numeric: tabular-nums; }
+    .pct-pos { color: var(--kimp); }
+    .pct-neg { color: var(--reverse); }
+    .empty { padding: 40px; text-align: center; color: var(--muted); }
+  </style>
+</head>
+<body>
+<header>
+  <h1>김프 모니터</h1>
+  <span class="status" id="status">로딩 중…</span>
+  <div class="controls">
+    <label>방향
+      <select id="filter-dir">
+        <option value="all">전체</option>
+        <option value="KIMP">김프만</option>
+        <option value="REVERSE">역프만</option>
+      </select>
+    </label>
+    <label>최소 |%|
+      <input id="filter-min" type="number" step="0.1" value="0" style="width: 70px" />
+    </label>
+    <label>심볼
+      <input id="filter-sym" type="text" placeholder="BTC,ETH…" style="width: 140px" />
+    </label>
+    <label>주기(s)
+      <input id="interval" type="number" min="2" step="1" value="5" style="width: 60px" />
+    </label>
+  </div>
+</header>
+
+<main>
+  <div id="warning" class="warning" style="display:none"></div>
+  <table>
+    <thead>
+      <tr>
+        <th data-sort="symbol">심볼</th>
+        <th data-sort="direction">방향</th>
+        <th data-sort="premium_pct" class="num">프리미엄 %</th>
+        <th data-sort="upbit_krw" class="num">Upbit (KRW)</th>
+        <th data-sort="binance_usdt" class="num">Binance (USDT)</th>
+        <th data-sort="binance_krw" class="num">Binance (KRW)</th>
+      </tr>
+    </thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div id="empty" class="empty" style="display:none">표시할 데이터가 없습니다.</div>
+</main>
+
+<script>
+const fmt = (n, digits = 2) =>
+  n.toLocaleString("ko-KR", { minimumFractionDigits: digits, maximumFractionDigits: digits });
+
+let sortKey = "premium_pct";
+let sortDir = -1; // desc
+let timer = null;
+let lastData = null;
+
+function applyFiltersAndRender() {
+  if (!lastData) return;
+  const dir = document.getElementById("filter-dir").value;
+  const minAbs = parseFloat(document.getElementById("filter-min").value) || 0;
+  const symFilter = document.getElementById("filter-sym").value
+    .toUpperCase()
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  let rows = lastData.spreads.filter((s) => {
+    if (dir !== "all" && s.direction !== dir) return false;
+    if (Math.abs(s.premium_pct) < minAbs) return false;
+    if (symFilter.length && !symFilter.includes(s.symbol)) return false;
+    return true;
+  });
+
+  rows.sort((a, b) => {
+    const av = a[sortKey], bv = b[sortKey];
+    if (typeof av === "string") return av.localeCompare(bv) * sortDir;
+    return (av - bv) * sortDir;
+  });
+
+  const tbody = document.getElementById("rows");
+  const empty = document.getElementById("empty");
+  tbody.innerHTML = "";
+  if (!rows.length) {
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+  for (const s of rows) {
+    const pctClass = s.premium_pct >= 0 ? "pct-pos" : "pct-neg";
+    const sign = s.premium_pct >= 0 ? "+" : "";
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${s.symbol}</td>
+      <td class="dir-${s.direction}">${s.direction === "KIMP" ? "김프" : "역프"}</td>
+      <td class="num ${pctClass}">${sign}${fmt(s.premium_pct, 2)}%</td>
+      <td class="num">${fmt(s.upbit_krw, 2)}</td>
+      <td class="num">${fmt(s.binance_usdt, 4)}</td>
+      <td class="num">${fmt(s.binance_krw, 2)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+async function refresh() {
+  try {
+    const res = await fetch("/api/spreads");
+    const data = await res.json();
+    const warn = document.getElementById("warning");
+    if (!res.ok) {
+      warn.style.display = "block";
+      warn.textContent = `오류: ${data.error || res.statusText}`;
+      return;
+    }
+    if (data.warning) {
+      warn.style.display = "block";
+      warn.textContent = `경고: ${data.warning} (캐시 표시 중)`;
+    } else {
+      warn.style.display = "none";
+    }
+    lastData = data;
+    document.getElementById("status").textContent =
+      `업데이트 ${data.updated_at} · USD/KRW ${fmt(data.usd_krw, 2)} · 공통 ${data.common_count}종`;
+    applyFiltersAndRender();
+  } catch (err) {
+    const warn = document.getElementById("warning");
+    warn.style.display = "block";
+    warn.textContent = `네트워크 오류: ${err.message}`;
+  }
+}
+
+function scheduleRefresh() {
+  if (timer) clearInterval(timer);
+  const sec = Math.max(2, parseInt(document.getElementById("interval").value) || 5);
+  timer = setInterval(refresh, sec * 1000);
+}
+
+document.querySelectorAll("th[data-sort]").forEach((th) => {
+  th.addEventListener("click", () => {
+    const key = th.dataset.sort;
+    if (sortKey === key) sortDir = -sortDir;
+    else { sortKey = key; sortDir = key === "symbol" ? 1 : -1; }
+    applyFiltersAndRender();
+  });
+});
+
+["filter-dir", "filter-min", "filter-sym"].forEach((id) => {
+  document.getElementById(id).addEventListener("input", applyFiltersAndRender);
+});
+document.getElementById("interval").addEventListener("change", scheduleRefresh);
+
+refresh();
+scheduleRefresh();
+</script>
+</body>
+</html>

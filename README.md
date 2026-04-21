@@ -13,6 +13,19 @@ pip install -r requirements.txt
 
 ## 실행
 
+### 웹 대시보드
+
+```bash
+python app.py                 # http://localhost:8000
+python app.py --port 8080     # 포트 변경
+```
+
+브라우저에서 접속하면 김프/역프 테이블이 자동 새로고침된다.
+방향 필터(김프만/역프만), 최소 |%| 필터, 심볼 검색, 주기 조절, 컬럼 정렬 지원.
+백엔드는 5초 TTL 캐시로 거래소 API rate limit을 보호한다.
+
+### CLI
+
 ```bash
 # 10초마다 폴링, 각 방향 상위 10개 출력
 python main.py
