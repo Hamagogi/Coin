@@ -70,12 +70,22 @@ python main.py --once
 ## 계산식
 
 ```
-binance_krw = binance_usdt * USD/KRW
-premium%    = (upbit_krw - binance_krw) / binance_krw * 100
+overseas_krw = overseas_usdt * USD/KRW
+premium%     = (upbit_krw - overseas_krw) / overseas_krw * 100
+net_profit%  = |premium%| - upbit_taker_fee% - overseas_taker_fee%
 ```
 
 - `premium% > 0` → **김프** (국내가 더 비쌈)
 - `premium% < 0` → **역프** (해외가 더 비쌈)
+- `net_profit% > 0` 이면 체결 수수료 차감 후 수익 영역
+
+**순수익 모델의 한계**: taker 수수료만 반영한다. 실제 차익거래에서는 다음이
+추가로 발생하므로 표시된 순수익은 **상한선**이다.
+
+- 코인별 출금 수수료 (고정 USD 금액, 거래 규모에 따라 bp 변동)
+- 블록체인 입출금 지연 동안의 가격 변동 (분~시간)
+- KRW ↔ USDT 환전 스프레드 (P2P/OTC 루트)
+- 슬리피지, 거래 정지, 입출금 중단 위험
 
 ## 데이터 소스
 

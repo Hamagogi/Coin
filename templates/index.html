@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <title>김프 모니터 — Upbit vs Binance</title>
+  <title>김프 모니터</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root {
@@ -14,6 +14,7 @@
       --kimp: #2ea043;
       --reverse: #f85149;
       --accent: #58a6ff;
+      --dim: #6e7681;
     }
     * { box-sizing: border-box; }
     body {
@@ -23,32 +24,32 @@
       color: var(--text);
     }
     header {
-      padding: 16px 20px;
+      padding: 14px 20px;
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       flex-wrap: wrap;
     }
     header h1 { margin: 0; font-size: 18px; }
-    .status { color: var(--muted); font-size: 13px; }
+    .status { color: var(--muted); font-size: 13px; flex: 1 1 auto; min-width: 200px; }
     .controls {
-      margin-left: auto;
       display: flex;
-      gap: 12px;
+      gap: 10px;
       align-items: center;
       flex-wrap: wrap;
+      width: 100%;
     }
-    .controls label { color: var(--muted); font-size: 13px; }
+    .controls label { color: var(--muted); font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
     .controls input, .controls select {
       background: var(--panel);
       color: var(--text);
       border: 1px solid var(--border);
       border-radius: 4px;
-      padding: 4px 8px;
+      padding: 5px 8px;
       font-size: 13px;
     }
-    main { padding: 16px 20px; }
+    main { padding: 14px 20px; }
     .warning {
       background: #4a2e05;
       border: 1px solid #8b6508;
@@ -56,6 +57,7 @@
       border-radius: 4px;
       margin-bottom: 12px;
       font-size: 13px;
+      word-break: break-word;
     }
     table {
       width: 100%;
@@ -65,16 +67,15 @@
       border-radius: 6px;
       overflow: hidden;
     }
-    th, td { padding: 8px 12px; text-align: right; border-bottom: 1px solid var(--border); }
+    th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
     th:first-child, td:first-child { text-align: left; }
-    th:nth-child(2), td:nth-child(2) { text-align: center; }
     th {
       background: #1c2128;
       color: var(--muted);
       font-weight: 600;
       font-size: 12px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       cursor: pointer;
       user-select: none;
     }
@@ -85,7 +86,29 @@
     .num { font-variant-numeric: tabular-nums; }
     .pct-pos { color: var(--kimp); }
     .pct-neg { color: var(--reverse); }
+    .net-bad { color: var(--dim); }
     .empty { padding: 40px; text-align: center; color: var(--muted); }
+
+    /* 모바일 최적화 */
+    @media (max-width: 640px) {
+      header { padding: 10px 12px; gap: 8px; }
+      header h1 { font-size: 16px; }
+      .status { font-size: 12px; min-width: 0; }
+      .controls { gap: 6px; }
+      .controls label { font-size: 12px; }
+      .controls input, .controls select { padding: 4px 6px; font-size: 12px; }
+      main { padding: 10px 8px; }
+      th, td { padding: 6px 5px; font-size: 12px; }
+      th { font-size: 10px; letter-spacing: 0.02em; }
+      /* 방향 컬럼 숨김 — 프리미엄 부호/색상으로 방향 식별 가능 */
+      th.col-dir, td.col-dir { display: none; }
+      /* 해외 USDT 컬럼 숨김 — 해외 KRW로 충분 */
+      th.col-overseas-usdt, td.col-overseas-usdt { display: none; }
+    }
+    @media (max-width: 400px) {
+      /* 초협소 화면: Upbit KRW도 숨기고 핵심 지표만 */
+      th.col-upbit-krw, td.col-upbit-krw { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -101,13 +124,19 @@
       </select>
     </label>
     <label>최소 |%|
-      <input id="filter-min" type="number" step="0.1" value="0" style="width: 70px" />
+      <input id="filter-min" type="number" step="0.1" value="0" style="width: 60px" />
     </label>
     <label>심볼
-      <input id="filter-sym" type="text" placeholder="BTC,ETH…" style="width: 140px" />
+      <input id="filter-sym" type="text" placeholder="BTC,ETH…" style="width: 110px" />
     </label>
     <label>주기(s)
-      <input id="interval" type="number" min="2" step="1" value="5" style="width: 60px" />
+      <input id="interval" type="number" min="2" step="1" value="5" style="width: 52px" />
+    </label>
+    <label title="업비트 taker 수수료 (%)">업비트%
+      <input id="fee-upbit" type="number" step="0.01" min="0" value="0.05" style="width: 60px" />
+    </label>
+    <label title="해외 거래소 taker 수수료 (%)">해외%
+      <input id="fee-overseas" type="number" step="0.01" min="0" value="0.1" style="width: 60px" />
     </label>
   </div>
 </header>
@@ -118,10 +147,11 @@
     <thead>
       <tr>
         <th data-sort="symbol">심볼</th>
-        <th data-sort="direction">방향</th>
-        <th data-sort="premium_pct" class="num">프리미엄 %</th>
-        <th data-sort="upbit_krw" class="num">Upbit (KRW)</th>
-        <th data-sort="binance_usdt" class="num" id="th-overseas-usdt">해외 (USDT)</th>
+        <th data-sort="direction" class="col-dir">방향</th>
+        <th data-sort="premium_pct" class="num">프리미엄%</th>
+        <th data-sort="net_pct" class="num" title="순수익 = |프리미엄| − 업비트 수수료 − 해외 수수료 (출금비 제외)">순수익%</th>
+        <th data-sort="upbit_krw" class="num col-upbit-krw">Upbit (KRW)</th>
+        <th data-sort="binance_usdt" class="num col-overseas-usdt" id="th-overseas-usdt">해외 (USDT)</th>
         <th data-sort="binance_krw" class="num" id="th-overseas-krw">해외 (KRW)</th>
       </tr>
     </thead>
@@ -134,10 +164,28 @@
 const fmt = (n, digits = 2) =>
   n.toLocaleString("ko-KR", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 
-let sortKey = "premium_pct";
+let sortKey = "net_pct";
 let sortDir = -1; // desc
 let timer = null;
 let lastData = null;
+
+// 수수료 값 localStorage에서 복원
+function restoreFees() {
+  const u = localStorage.getItem("fee-upbit");
+  const o = localStorage.getItem("fee-overseas");
+  if (u !== null) document.getElementById("fee-upbit").value = u;
+  if (o !== null) document.getElementById("fee-overseas").value = o;
+}
+function persistFees() {
+  localStorage.setItem("fee-upbit", document.getElementById("fee-upbit").value);
+  localStorage.setItem("fee-overseas", document.getElementById("fee-overseas").value);
+}
+
+function getFees() {
+  const up = Math.max(0, parseFloat(document.getElementById("fee-upbit").value) || 0);
+  const ov = Math.max(0, parseFloat(document.getElementById("fee-overseas").value) || 0);
+  return { up, ov, total: up + ov };
+}
 
 function applyFiltersAndRender() {
   if (!lastData) return;
@@ -148,13 +196,16 @@ function applyFiltersAndRender() {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+  const fees = getFees();
 
-  let rows = lastData.spreads.filter((s) => {
-    if (dir !== "all" && s.direction !== dir) return false;
-    if (Math.abs(s.premium_pct) < minAbs) return false;
-    if (symFilter.length && !symFilter.includes(s.symbol)) return false;
-    return true;
-  });
+  let rows = lastData.spreads
+    .filter((s) => {
+      if (dir !== "all" && s.direction !== dir) return false;
+      if (Math.abs(s.premium_pct) < minAbs) return false;
+      if (symFilter.length && !symFilter.includes(s.symbol)) return false;
+      return true;
+    })
+    .map((s) => ({ ...s, net_pct: Math.abs(s.premium_pct) - fees.total }));
 
   rows.sort((a, b) => {
     const av = a[sortKey], bv = b[sortKey];
@@ -172,14 +223,17 @@ function applyFiltersAndRender() {
   empty.style.display = "none";
   for (const s of rows) {
     const pctClass = s.premium_pct >= 0 ? "pct-pos" : "pct-neg";
-    const sign = s.premium_pct >= 0 ? "+" : "";
+    const psign = s.premium_pct >= 0 ? "+" : "";
+    const netClass = s.net_pct > 0 ? "pct-pos" : "net-bad";
+    const nsign = s.net_pct >= 0 ? "+" : "";
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${s.symbol}</td>
-      <td class="dir-${s.direction}">${s.direction === "KIMP" ? "김프" : "역프"}</td>
-      <td class="num ${pctClass}">${sign}${fmt(s.premium_pct, 2)}%</td>
-      <td class="num">${fmt(s.upbit_krw, 2)}</td>
-      <td class="num">${fmt(s.binance_usdt, 4)}</td>
+      <td class="col-dir dir-${s.direction}">${s.direction === "KIMP" ? "김프" : "역프"}</td>
+      <td class="num ${pctClass}">${psign}${fmt(s.premium_pct, 2)}%</td>
+      <td class="num ${netClass}">${nsign}${fmt(s.net_pct, 2)}%</td>
+      <td class="num col-upbit-krw">${fmt(s.upbit_krw, 2)}</td>
+      <td class="num col-overseas-usdt">${fmt(s.binance_usdt, 4)}</td>
       <td class="num">${fmt(s.binance_krw, 2)}</td>
     `;
     tbody.appendChild(tr);
@@ -205,7 +259,7 @@ async function refresh() {
     lastData = data;
     const src = (data.overseas_source || "?").toUpperCase();
     document.getElementById("status").textContent =
-      `업데이트 ${data.updated_at} · USD/KRW ${fmt(data.usd_krw, 2)} · 해외 ${src} · 공통 ${data.common_count}종`;
+      `업데이트 ${data.updated_at.slice(11, 19)} · USD/KRW ${fmt(data.usd_krw, 2)} · 해외 ${src} · 공통 ${data.common_count}종`;
     document.getElementById("th-overseas-usdt").textContent = `${src} (USDT)`;
     document.getElementById("th-overseas-krw").textContent = `${src} (KRW)`;
     applyFiltersAndRender();
@@ -234,8 +288,15 @@ document.querySelectorAll("th[data-sort]").forEach((th) => {
 ["filter-dir", "filter-min", "filter-sym"].forEach((id) => {
   document.getElementById(id).addEventListener("input", applyFiltersAndRender);
 });
+["fee-upbit", "fee-overseas"].forEach((id) => {
+  document.getElementById(id).addEventListener("input", () => {
+    persistFees();
+    applyFiltersAndRender();
+  });
+});
 document.getElementById("interval").addEventListener("change", scheduleRefresh);
 
+restoreFees();
 refresh();
 scheduleRefresh();
 </script>
