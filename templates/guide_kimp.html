@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}김치 프리미엄(김프)이란? 2026년 완벽 가이드 — {{ site_name }}{% endblock %}
+{% block description %}김프의 정의, 발생 원인, 역사적 추이, 현재 차익거래 가능성까지 한국 투자자 시각으로 정리한 가이드.{% endblock %}
+
+{% block body %}
+<article class="prose">
+<h1>김치 프리미엄(김프)이란?</h1>
+<p>한국 거래소에서 거래되는 가상자산 가격이 해외 거래소 가격보다 높게 형성되는 현상을 <strong>김치 프리미엄(Kimchi Premium, 약칭 김프)</strong>이라 합니다. 반대로 한국이 더 싼 경우는 <strong>역프리미엄(역프)</strong>이라 부릅니다.</p>
+
+<h2>계산 공식</h2>
+<pre style="background:#161b22;border:1px solid #2a313c;padding:10px;border-radius:6px;overflow-x:auto;">
+premium(%) = (업비트_원화가격 − 해외_USDT가격 × USD/KRW환율) / (해외_USDT가격 × USD/KRW환율) × 100
+</pre>
+<p>양수면 김프, 음수면 역프입니다. 본 사이트 <a href="/">실시간 대시보드</a>는 이 계산을 공통 상장 코인 전체에 대해 수초 간격으로 자동 수행합니다.</p>
+
+<h2>왜 발생하는가?</h2>
+<ul>
+  <li><strong>원화의 폐쇄성</strong> — KRW는 국제 결제에 거의 쓰이지 않고, 외환 반출입이 엄격히 관리됩니다.</li>
+  <li><strong>차익거래 진입장벽</strong> — 트래블룰·은행 AML·거래소 입출금 중단 등으로 자본이 국경을 넘나들며 가격차를 상쇄하기 어렵습니다.</li>
+  <li><strong>한국 리테일 수요 편향</strong> — 특정 테마(밈코인·L2·AI) 유행 시 국내 수요가 해외보다 과열되는 경향.</li>
+  <li><strong>업비트 USDT-KRW 프리미엄</strong> — 달러 스테이블코인 자체가 원화 대비 꾸준한 프리미엄을 가짐.</li>
+</ul>
+
+<h2>역사적 추이</h2>
+<table>
+<thead><tr><th>시기</th><th>최고 김프</th><th>배경</th></tr></thead>
+<tbody>
+<tr><td>2017년 12월</td><td>+50% 내외</td><td>비트코인 1차 대폭등, 국내 광풍</td></tr>
+<tr><td>2018년 1월</td><td>급락 후 역프</td><td>정부 규제·거래소 실명계좌 조치</td></tr>
+<tr><td>2021년 4월</td><td>+22%</td><td>알트코인 시즌, 도지코인 열풍</td></tr>
+<tr><td>2022~2023</td><td>+2~6%</td><td>테라 붕괴·FTX 파산 이후 전반적 관심 감소</td></tr>
+<tr><td>2024~2025</td><td>+0~3%</td><td>ETF 승인 글로벌 유동성 증가, 한국 프리미엄 축소</td></tr>
+<tr><td>2026 현재</td><td>+0~2%</td><td>트래블룰 안정화, 소규모 김프만 간헐적 발생</td></tr>
+</tbody>
+</table>
+
+<h2>차익거래 가능한가?</h2>
+<p>이론상 “해외에서 사서 국내로 보내 더 비싸게 파는” 단순한 구조지만, 실제로는 다음 비용·제약이 누적됩니다.</p>
+<ol>
+  <li>업비트 taker 수수료 0.05% + 해외 taker 0.1%</li>
+  <li>코인 출금 수수료 (네트워크별 고정 USD)</li>
+  <li>입금 대기 5~60분 중 가격 변동</li>
+  <li>KRW ↔ USDT 환전 스프레드 0.3~0.8%</li>
+  <li><strong>트래블룰</strong> — 업비트에서 해외 거래소로 100만원 이상 송금 시 거래소 간 KYC 정보 교환 필요. Binance·Bybit·OKX 일부 경로 제한.</li>
+  <li>업비트의 빈번한 <strong>입출금 일시 중단</strong></li>
+</ol>
+<p>결론적으로 현재 시장(2026년 기준)에서 1% 미만 김프는 거의 전부 비용에 잠식되어 수익이 나지 않습니다. 실전 차익거래는 <strong>2~3% 이상의 스파이크</strong>를 포착하고, 자본 규모가 1,000만원 이상일 때 의미 있는 수익이 됩니다.</p>
+
+<h2>그럼에도 왜 모니터링하나?</h2>
+<ul>
+  <li><strong>시장 과열·공포의 실시간 지표</strong> — 김프가 3% 이상 벌어지면 국내 리테일 과열 신호.</li>
+  <li><strong>알트 시즌 선행 지표</strong> — 소형 알트의 역프가 심해지면 국내 매도 압력 포착.</li>
+  <li><strong>상장 스나이핑 기회</strong> — 업비트 신규 상장 공지 순간 해외 가격과의 격차를 실시간 추적.</li>
+</ul>
+
+<p style="margin-top:24px;"><a class="btn" href="/">실시간 김프 보러 가기 →</a></p>
+</article>
+{% endblock %}

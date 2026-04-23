@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}거래소 수수료 & 출금비 비교표 2026 — {{ site_name }}{% endblock %}
+{% block description %}업비트·빗썸·바이낸스·바이빗·OKX·비트겟의 taker/maker 수수료, 주요 코인 출금비까지 한 페이지 비교.{% endblock %}
+
+{% block body %}
+<article class="prose">
+<h1>거래소 수수료 & 출금비 비교 (2026)</h1>
+<p>차익거래 순수익은 <strong>가격차 − 체결 수수료 − 출금 수수료 − 환전 스프레드</strong>로 결정됩니다. 거래소 선택이 곧 수익률입니다.</p>
+
+<h2>체결 수수료 (Taker 기준)</h2>
+<table>
+<thead><tr><th>거래소</th><th>Taker</th><th>Maker</th><th>할인 후</th><th>비고</th></tr></thead>
+<tbody>
+<tr><td>업비트 (KRW)</td><td>0.05%</td><td>0.05%</td><td>—</td><td>한국 원화 거래</td></tr>
+<tr><td>빗썸</td><td>0.04%</td><td>0.04%</td><td>쿠폰 사용 시 0.01%</td><td>한국 원화 거래</td></tr>
+<tr><td>Binance</td><td>0.10%</td><td>0.10%</td><td>BNB 할인 0.075%</td><td>세계 1위 유동성</td></tr>
+<tr><td>Bybit</td><td>0.10%</td><td>0.10%</td><td>VIP 0.03%~</td><td>김프 루트 인기</td></tr>
+<tr><td>OKX</td><td>0.10%</td><td>0.08%</td><td>VIP 0.05%~</td><td>Top 3 유동성</td></tr>
+<tr><td>Bitget</td><td>0.10%</td><td>0.10%</td><td>VIP·프로모션 다양</td><td>환급률 높음</td></tr>
+<tr><td>MEXC</td><td>0.05% (프로모션)</td><td>0%</td><td>—</td><td>신규 상장 빠름</td></tr>
+</tbody>
+</table>
+<p style="color:var(--muted);font-size:12px;">※ Referral 가입 시 대부분 거래소가 추가 20~50% 수수료 환급을 제공합니다. <a href="/guide/exchanges">거래소별 가입 혜택 정리 →</a></p>
+
+<h2>주요 코인 출금 수수료 (해외 거래소 기준 평균)</h2>
+<table>
+<thead><tr><th>코인 / 네트워크</th><th>출금비 (USD)</th><th>$1,000 거래 시 %</th><th>확정 속도</th></tr></thead>
+<tbody>
+<tr><td>BTC (비트코인)</td><td>$5~15</td><td>0.5~1.5%</td><td>10~30분</td></tr>
+<tr><td>ETH (이더리움 메인넷)</td><td>$3~10</td><td>0.3~1.0%</td><td>5~15분</td></tr>
+<tr><td>USDT (ERC20)</td><td>$10~20</td><td>1.0~2.0%</td><td>5~15분</td></tr>
+<tr style="background:#0b1f11;"><td><strong>USDT (TRC20)</strong></td><td>$1~2</td><td>0.1~0.2%</td><td>1~3분</td></tr>
+<tr style="background:#0b1f11;"><td><strong>XRP</strong></td><td>$0.25~0.5</td><td>0.025~0.05%</td><td>수십 초</td></tr>
+<tr style="background:#0b1f11;"><td><strong>SOL</strong></td><td>$0.05~0.2</td><td>0.005~0.02%</td><td>수 초</td></tr>
+<tr style="background:#0b1f11;"><td><strong>TRX</strong></td><td>$0.5~1</td><td>0.05~0.1%</td><td>1~3분</td></tr>
+<tr><td>DOGE</td><td>$2~5</td><td>0.2~0.5%</td><td>1~5분</td></tr>
+</tbody>
+</table>
+<p>초록색으로 표시된 네트워크가 <strong>차익거래 최적</strong>입니다. 출금비가 고정 USD 금액이라 거래 규모가 작을수록 % 비중이 커집니다.</p>
+
+<h2>$1,000 거래 1회 총 비용 예시 (XRP 루트, 김프 방향)</h2>
+<ul>
+  <li>해외 taker 매수: $1.00 (0.10%)</li>
+  <li>XRP 출금 수수료: $0.30 (0.03%)</li>
+  <li>업비트 매도 taker: $0.50 (0.05%)</li>
+  <li>KRW → USDT 환전 스프레드: $4~6 (0.4~0.6%)</li>
+  <li>이동 중 가격 변동(평균): ±$3 (±0.3%)</li>
+</ul>
+<p><strong>합계 약 $9 (0.9%)</strong> — 프리미엄이 <u>1% 이상</u>이어야 본전, <u>1.5% 이상</u>부터 의미 있는 수익.</p>
+
+<h2>규모별 손익분기점</h2>
+<table>
+<thead><tr><th>자본</th><th>고정비 비중</th><th>필요 김프</th></tr></thead>
+<tbody>
+<tr><td>100만원</td><td>0.5~0.8%</td><td>2% 이상</td></tr>
+<tr><td>1,000만원</td><td>0.05~0.1%</td><td>1% 이상</td></tr>
+<tr><td>1억원</td><td>거의 무시</td><td>0.5% 이상</td></tr>
+</tbody>
+</table>
+
+<p style="margin-top:24px;"><a class="btn" href="/">실시간 김프 보러 가기 →</a> <a class="btn ghost" href="/guide/exchanges">거래소 추천 보기 →</a></p>
+</article>
+{% endblock %}

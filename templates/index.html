@@ -1,118 +1,109 @@
-<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8" />
-  <title>김프 모니터</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root {
-      --bg: #0e1116;
-      --panel: #161b22;
-      --border: #2a313c;
-      --text: #e6edf3;
-      --muted: #8b949e;
-      --kimp: #2ea043;
-      --reverse: #f85149;
-      --accent: #58a6ff;
-      --dim: #6e7681;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-    header {
-      padding: 14px 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-    header h1 { margin: 0; font-size: 18px; }
-    .status { color: var(--muted); font-size: 13px; flex: 1 1 auto; min-width: 200px; }
-    .controls {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-      width: 100%;
-    }
-    .controls label { color: var(--muted); font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
-    .controls input, .controls select {
-      background: var(--panel);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 5px 8px;
-      font-size: 13px;
-    }
-    main { padding: 14px 20px; }
-    .warning {
-      background: #4a2e05;
-      border: 1px solid #8b6508;
-      padding: 8px 12px;
-      border-radius: 4px;
-      margin-bottom: 12px;
-      font-size: 13px;
-      word-break: break-word;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
-    th:first-child, td:first-child { text-align: left; }
-    th {
-      background: #1c2128;
-      color: var(--muted);
-      font-weight: 600;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      cursor: pointer;
-      user-select: none;
-    }
-    th:hover { color: var(--text); }
-    tbody tr:hover { background: #1c2128; }
-    .dir-KIMP { color: var(--kimp); font-weight: 600; }
-    .dir-REVERSE { color: var(--reverse); font-weight: 600; }
-    .num { font-variant-numeric: tabular-nums; }
-    .pct-pos { color: var(--kimp); }
-    .pct-neg { color: var(--reverse); }
-    .net-bad { color: var(--dim); }
-    .empty { padding: 40px; text-align: center; color: var(--muted); }
+{% extends "base.html" %}
 
-    /* 모바일 최적화 */
-    @media (max-width: 640px) {
-      header { padding: 10px 12px; gap: 8px; }
-      header h1 { font-size: 16px; }
-      .status { font-size: 12px; min-width: 0; }
-      .controls { gap: 6px; }
-      .controls label { font-size: 12px; }
-      .controls input, .controls select { padding: 4px 6px; font-size: 12px; }
-      main { padding: 10px 8px; }
-      th, td { padding: 6px 5px; font-size: 12px; }
-      th { font-size: 10px; letter-spacing: 0.02em; }
-      /* 방향 컬럼 숨김 — 프리미엄 부호/색상으로 방향 식별 가능 */
-      th.col-dir, td.col-dir { display: none; }
-      /* 해외 USDT 컬럼 숨김 — 해외 KRW로 충분 */
-      th.col-overseas-usdt, td.col-overseas-usdt { display: none; }
-    }
-    @media (max-width: 400px) {
-      /* 초협소 화면: Upbit KRW도 숨기고 핵심 지표만 */
-      th.col-upbit-krw, td.col-upbit-krw { display: none; }
-    }
-  </style>
-</head>
-<body>
-<header>
+{% block title %}실시간 김치 프리미엄 · 수수료 차감 순수익 {{ site_name }}{% endblock %}
+{% block description %}Upbit과 Bybit·OKX·Binance 가격을 실시간 비교. 김프·역프·수수료 차감 순수익을 모든 공통 코인에서 자동 계산. 모바일 최적화.{% endblock %}
+
+{% block extra_styles %}
+header.board {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+header.board h1 { margin: 0; font-size: 18px; }
+.status { color: var(--muted); font-size: 13px; flex: 1 1 auto; min-width: 200px; }
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.controls label { color: var(--muted); font-size: 13px; display: inline-flex; gap: 6px; align-items: center; }
+.controls input, .controls select {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 13px;
+}
+main.board { padding: 14px 20px; }
+.warning {
+  background: #4a2e05;
+  border: 1px solid #8b6508;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  word-break: break-word;
+}
+table.board {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+table.board th, table.board td {
+  padding: 8px 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+table.board th:first-child, table.board td:first-child { text-align: left; }
+table.board th {
+  background: #1c2128;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  user-select: none;
+}
+table.board th:hover { color: var(--text); }
+tbody tr:hover { background: #1c2128; }
+.dir-KIMP { color: var(--kimp); font-weight: 600; }
+.dir-REVERSE { color: var(--reverse); font-weight: 600; }
+.num { font-variant-numeric: tabular-nums; }
+.pct-pos { color: var(--kimp); }
+.pct-neg { color: var(--reverse); }
+.net-bad { color: var(--dim); }
+.empty { padding: 40px; text-align: center; color: var(--muted); }
+td a.buy {
+  color: var(--accent);
+  font-size: 12px;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+}
+td a.buy:hover { text-decoration: none; border-color: var(--accent); }
+
+@media (max-width: 640px) {
+  header.board { padding: 10px 12px; gap: 8px; }
+  header.board h1 { font-size: 16px; }
+  .status { font-size: 12px; min-width: 0; }
+  .controls { gap: 6px; }
+  .controls label { font-size: 12px; }
+  .controls input, .controls select { padding: 4px 6px; font-size: 12px; }
+  main.board { padding: 10px 8px; }
+  table.board th, table.board td { padding: 6px 5px; font-size: 12px; }
+  table.board th { font-size: 10px; letter-spacing: 0.02em; }
+  th.col-dir, td.col-dir { display: none; }
+  th.col-overseas-usdt, td.col-overseas-usdt { display: none; }
+  th.col-buy, td.col-buy { display: none; }
+}
+@media (max-width: 400px) {
+  th.col-upbit-krw, td.col-upbit-krw { display: none; }
+}
+{% endblock %}
+
+{% block body %}
+<header class="board">
   <h1>김프 모니터</h1>
   <span class="status" id="status">로딩 중…</span>
   <div class="controls">
@@ -141,9 +132,21 @@
   </div>
 </header>
 
-<main>
+<div class="cta-banner">
+  <div class="text">
+    <strong>해외 거래소 수수료 할인 받고 시작하세요</strong>
+    <small>Bybit·OKX·Bitget 가입 시 수수료 환급 + 보너스. 김프 역차익 루트로 자주 쓰는 거래소입니다.</small>
+  </div>
+  <div class="buttons">
+    <a class="btn" href="{{ exchange_home('bybit') }}" target="_blank" rel="nofollow noopener sponsored">Bybit 가입</a>
+    <a class="btn" href="{{ exchange_home('okx') }}" target="_blank" rel="nofollow noopener sponsored">OKX 가입</a>
+    <a class="btn ghost" href="/guide/exchanges">거래소 비교 →</a>
+  </div>
+</div>
+
+<main class="board">
   <div id="warning" class="warning" style="display:none"></div>
-  <table>
+  <table class="board">
     <thead>
       <tr>
         <th data-sort="symbol">심볼</th>
@@ -153,23 +156,44 @@
         <th data-sort="upbit_krw" class="num col-upbit-krw">Upbit (KRW)</th>
         <th data-sort="binance_usdt" class="num col-overseas-usdt" id="th-overseas-usdt">해외 (USDT)</th>
         <th data-sort="binance_krw" class="num" id="th-overseas-krw">해외 (KRW)</th>
+        <th class="col-buy">거래</th>
       </tr>
     </thead>
     <tbody id="rows"></tbody>
   </table>
   <div id="empty" class="empty" style="display:none">표시할 데이터가 없습니다.</div>
 </main>
+{% endblock %}
 
+{% block scripts %}
 <script>
+const BYBIT_REF = {{ refs.bybit | tojson }};
+const OKX_REF = {{ refs.okx | tojson }};
+const BINANCE_REF = {{ refs.binance | tojson }};
+
 const fmt = (n, digits = 2) =>
   n.toLocaleString("ko-KR", { minimumFractionDigits: digits, maximumFractionDigits: digits });
 
+function buyUrl(source, symbol) {
+  const base = symbol.toUpperCase();
+  const baseLower = symbol.toLowerCase();
+  if (source === "bybit") {
+    return `https://www.bybit.com/en/trade/spot/${base}/USDT${BYBIT_REF ? `?affiliate_id=${BYBIT_REF}` : ""}`;
+  }
+  if (source === "okx") {
+    return `https://www.okx.com/trade-spot/${baseLower}-usdt${OKX_REF ? `?channelId=${OKX_REF}` : ""}`;
+  }
+  if (source === "binance") {
+    return `https://www.binance.com/en/trade/${base}_USDT`;
+  }
+  return "#";
+}
+
 let sortKey = "net_pct";
-let sortDir = -1; // desc
+let sortDir = -1;
 let timer = null;
 let lastData = null;
 
-// 수수료 값 localStorage에서 복원
 function restoreFees() {
   const u = localStorage.getItem("fee-upbit");
   const o = localStorage.getItem("fee-overseas");
@@ -180,7 +204,6 @@ function persistFees() {
   localStorage.setItem("fee-upbit", document.getElementById("fee-upbit").value);
   localStorage.setItem("fee-overseas", document.getElementById("fee-overseas").value);
 }
-
 function getFees() {
   const up = Math.max(0, parseFloat(document.getElementById("fee-upbit").value) || 0);
   const ov = Math.max(0, parseFloat(document.getElementById("fee-overseas").value) || 0);
@@ -192,20 +215,16 @@ function applyFiltersAndRender() {
   const dir = document.getElementById("filter-dir").value;
   const minAbs = parseFloat(document.getElementById("filter-min").value) || 0;
   const symFilter = document.getElementById("filter-sym").value
-    .toUpperCase()
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
+    .toUpperCase().split(",").map(s => s.trim()).filter(Boolean);
   const fees = getFees();
+  const source = (lastData.overseas_source || "").toLowerCase();
 
-  let rows = lastData.spreads
-    .filter((s) => {
-      if (dir !== "all" && s.direction !== dir) return false;
-      if (Math.abs(s.premium_pct) < minAbs) return false;
-      if (symFilter.length && !symFilter.includes(s.symbol)) return false;
-      return true;
-    })
-    .map((s) => ({ ...s, net_pct: Math.abs(s.premium_pct) - fees.total }));
+  let rows = lastData.spreads.filter(s => {
+    if (dir !== "all" && s.direction !== dir) return false;
+    if (Math.abs(s.premium_pct) < minAbs) return false;
+    if (symFilter.length && !symFilter.includes(s.symbol)) return false;
+    return true;
+  }).map(s => ({ ...s, net_pct: Math.abs(s.premium_pct) - fees.total }));
 
   rows.sort((a, b) => {
     const av = a[sortKey], bv = b[sortKey];
@@ -216,16 +235,14 @@ function applyFiltersAndRender() {
   const tbody = document.getElementById("rows");
   const empty = document.getElementById("empty");
   tbody.innerHTML = "";
-  if (!rows.length) {
-    empty.style.display = "block";
-    return;
-  }
+  if (!rows.length) { empty.style.display = "block"; return; }
   empty.style.display = "none";
   for (const s of rows) {
     const pctClass = s.premium_pct >= 0 ? "pct-pos" : "pct-neg";
     const psign = s.premium_pct >= 0 ? "+" : "";
     const netClass = s.net_pct > 0 ? "pct-pos" : "net-bad";
     const nsign = s.net_pct >= 0 ? "+" : "";
+    const url = buyUrl(source, s.symbol);
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${s.symbol}</td>
@@ -235,6 +252,7 @@ function applyFiltersAndRender() {
       <td class="num col-upbit-krw">${fmt(s.upbit_krw, 2)}</td>
       <td class="num col-overseas-usdt">${fmt(s.binance_usdt, 4)}</td>
       <td class="num">${fmt(s.binance_krw, 2)}</td>
+      <td class="col-buy">${url !== "#" ? `<a class="buy" href="${url}" target="_blank" rel="nofollow noopener sponsored">매수</a>` : ""}</td>
     `;
     tbody.appendChild(tr);
   }
@@ -276,7 +294,7 @@ function scheduleRefresh() {
   timer = setInterval(refresh, sec * 1000);
 }
 
-document.querySelectorAll("th[data-sort]").forEach((th) => {
+document.querySelectorAll("th[data-sort]").forEach(th => {
   th.addEventListener("click", () => {
     const key = th.dataset.sort;
     if (sortKey === key) sortDir = -sortDir;
@@ -284,14 +302,12 @@ document.querySelectorAll("th[data-sort]").forEach((th) => {
     applyFiltersAndRender();
   });
 });
-
-["filter-dir", "filter-min", "filter-sym"].forEach((id) => {
+["filter-dir", "filter-min", "filter-sym"].forEach(id => {
   document.getElementById(id).addEventListener("input", applyFiltersAndRender);
 });
-["fee-upbit", "fee-overseas"].forEach((id) => {
+["fee-upbit", "fee-overseas"].forEach(id => {
   document.getElementById(id).addEventListener("input", () => {
-    persistFees();
-    applyFiltersAndRender();
+    persistFees(); applyFiltersAndRender();
   });
 });
 document.getElementById("interval").addEventListener("change", scheduleRefresh);
@@ -300,5 +316,4 @@ restoreFees();
 refresh();
 scheduleRefresh();
 </script>
-</body>
-</html>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}해외 거래소 추천 & 가입 가이드 (한국인) — {{ site_name }}{% endblock %}
+{% block description %}한국인 김프 트레이더에게 추천하는 해외 거래소 비교. Bybit, OKX, Bitget, Binance의 장단점과 가입 혜택 정리.{% endblock %}
+
+{% block body %}
+<article class="prose">
+<h1>해외 거래소 추천 & 가입 가이드</h1>
+<p>한국인 트레이더가 김프·역프 차익, 펀딩비 아비트라지, 상장 스나이핑 등에 쓰기 좋은 해외 거래소를 실사용 기준으로 정리했습니다.</p>
+
+<h2>한눈에 보기</h2>
+<table>
+<thead><tr><th>거래소</th><th>유동성</th><th>한국 접근성</th><th>수수료 환급</th><th>추천 용도</th></tr></thead>
+<tbody>
+<tr><td><strong>Bybit</strong></td><td>⭐⭐⭐⭐</td><td>좋음</td><td>최대 30%</td><td>김프·펀딩비 아비·선물</td></tr>
+<tr><td><strong>OKX</strong></td><td>⭐⭐⭐⭐⭐</td><td>좋음</td><td>최대 50%</td><td>김프·DeFi 통합·옵션</td></tr>
+<tr><td><strong>Bitget</strong></td><td>⭐⭐⭐</td><td>좋음</td><td>최대 50%</td><td>카피트레이딩·신규코인</td></tr>
+<tr><td><strong>Binance</strong></td><td>⭐⭐⭐⭐⭐</td><td>보통 (IP 제한 가끔)</td><td>최대 40%</td><td>현물 대량·파생상품</td></tr>
+<tr><td><strong>MEXC</strong></td><td>⭐⭐⭐</td><td>좋음</td><td>최대 50%</td><td>상장 스나이핑·소형 알트</td></tr>
+</tbody>
+</table>
+
+<h2>1. Bybit — 김프 트레이더 기본 거래소</h2>
+<p>한국인 김프 트레이더 사이에서 가장 많이 쓰이는 거래소입니다. 현물·선물이 한 계좌 안에서 통합되어 <strong>펀딩비 아비트라지(현물 매수 + 선물 숏)</strong>에 최적. UI가 깔끔하고 앱 안정성도 높습니다.</p>
+<ul>
+  <li><strong>장점</strong>: UI/앱 완성도, 한국어 완벽 지원, KRW P2P 가능, 선물 유동성 Top</li>
+  <li><strong>단점</strong>: 신규 상장 속도는 상대적 느림</li>
+  <li><strong>추천 용도</strong>: 김프 매수·체결, 펀딩비 수익, 무기한 선물</li>
+</ul>
+<p><a class="btn" href="{{ exchange_home('bybit') }}" target="_blank" rel="nofollow noopener sponsored">Bybit 가입하기 →</a></p>
+
+<h2>2. OKX — 유동성과 상품 다양성</h2>
+<p>글로벌 Top 3 거래소. Binance보다 상품군이 풍부하고(옵션·DeFi 통합 지갑), 지역 제한이 덜합니다. 현물·선물·옵션을 한 곳에서 쓰려는 트레이더에게 최적.</p>
+<ul>
+  <li><strong>장점</strong>: 옵션 거래소 Top, Web3 지갑 통합, 지역 제한 적음</li>
+  <li><strong>단점</strong>: UI가 Bybit 대비 복잡</li>
+  <li><strong>추천 용도</strong>: 김프 루트 백업, 옵션, DeFi 브릿지</li>
+</ul>
+<p><a class="btn" href="{{ exchange_home('okx') }}" target="_blank" rel="nofollow noopener sponsored">OKX 가입하기 →</a></p>
+
+<h2>3. Bitget — 수수료 환급 & 카피트레이딩</h2>
+<p>Referral 수수료 환급률이 업계 최고 수준(최대 50%). 카피 트레이딩 플랫폼으로도 유명하며, 신규 가입 보너스·이벤트가 자주 있습니다.</p>
+<ul>
+  <li><strong>장점</strong>: 환급률 높음, 카피트레이딩 다양, 이벤트 풍부</li>
+  <li><strong>단점</strong>: 유동성은 Binance·Bybit·OKX 대비 낮음</li>
+  <li><strong>추천 용도</strong>: 저렴한 수수료 거래, 상위 트레이더 팔로우</li>
+</ul>
+<p><a class="btn" href="{{ exchange_home('bitget') }}" target="_blank" rel="nofollow noopener sponsored">Bitget 가입하기 →</a></p>
+
+<h2>4. Binance — 세계 1위, 단 접근 주의</h2>
+<p>유동성은 압도적이지만 한국을 포함한 일부 지역에서 IP 제한이 걸리는 경우가 있습니다. 대규모 현물·선물 거래자에게 유리.</p>
+<ul>
+  <li><strong>장점</strong>: 가장 깊은 호가창, 런치풀·소액 적립 등 부가 상품</li>
+  <li><strong>단점</strong>: 일부 지역 HTTP 451 차단, 한국 서비스 제한 이력</li>
+  <li><strong>추천 용도</strong>: 대규모 자본, 주요 페어 매매</li>
+</ul>
+<p><a class="btn" href="{{ exchange_home('binance') }}" target="_blank" rel="nofollow noopener sponsored">Binance 가입하기 →</a></p>
+
+<h2>5. MEXC — 상장 스나이핑 특화</h2>
+<p>신규 토큰 상장 속도가 업계에서 가장 빠른 편. 업비트에 상장되기 전 MEXC에서 먼저 거래할 수 있는 경우가 많아 <strong>상장 차익(listing arb)</strong> 루트로 유용합니다.</p>
+<ul>
+  <li><strong>장점</strong>: 신규 토큰 선점, 소형 알트 유동성</li>
+  <li><strong>단점</strong>: 선물 유동성 낮음, UI 덜 세련됨</li>
+  <li><strong>추천 용도</strong>: 상장 스나이핑, 업비트 상장 대기 매집</li>
+</ul>
+
+<h2>가입 팁</h2>
+<ol>
+  <li><strong>Referral 링크로 가입</strong> — 평생 수수료 환급이 붙습니다. 일반 가입 시 사라지는 혜택입니다.</li>
+  <li><strong>KYC 먼저 완료</strong> — 김프 터질 때 갑자기 하면 거래 타이밍 놓침.</li>
+  <li><strong>2FA 필수</strong> — Google Authenticator 등.</li>
+  <li><strong>트래블룰 대응</strong> — 업비트에서 해외 거래소로 바로 못 보내는 경우가 늘고 있으므로, 개인 지갑 경유 루트도 준비.</li>
+  <li><strong>소액 테스트 송금</strong> — 첫 출금 시 반드시 최소 금액으로 도착 확인 후 본송금.</li>
+</ol>
+
+<h2>법적 주의</h2>
+<p>해외 거래소는 한국 금융위에 신고된 가상자산사업자가 아닙니다. 원화 입금은 불가(P2P·USDT 매수 경유)하며, 이용에 따른 모든 위험은 본인 책임입니다. 또한 반복적인 외환 거래는 AML 모니터링 대상이 될 수 있습니다.</p>
+
+<p style="margin-top:24px;"><a class="btn" href="/">실시간 김프 보러 가기 →</a> <a class="btn ghost" href="/guide/fees">수수료 비교 →</a></p>
+</article>
+{% endblock %}

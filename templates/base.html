@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}{{ site_name }} — 실시간 김치 프리미엄 모니터{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ site_description }}{% endblock %}" />
+  <meta name="keywords" content="{{ site_keywords }}" />
+  <link rel="canonical" href="{{ site_url }}{{ request.path }}" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="{{ self.title() }}" />
+  <meta property="og:description" content="{{ self.description() }}" />
+  <meta property="og:url" content="{{ site_url }}{{ request.path }}" />
+  <meta property="og:site_name" content="{{ site_name }}" />
+  <meta property="og:locale" content="ko_KR" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{{ self.title() }}" />
+  <meta name="twitter:description" content="{{ self.description() }}" />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%232ea043'/><text x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='700'>₩</text></svg>" />
+
+  {% if ga_id %}
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '{{ ga_id }}');
+  </script>
+  {% endif %}
+  {% if clarity_id %}
+  <script>
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "{{ clarity_id }}");
+  </script>
+  {% endif %}
+
+  <style>
+    :root {
+      --bg: #0e1116;
+      --panel: #161b22;
+      --border: #2a313c;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --kimp: #2ea043;
+      --reverse: #f85149;
+      --accent: #58a6ff;
+      --dim: #6e7681;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font: 14px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav.top {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    nav.top .brand {
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--text);
+    }
+    nav.top .brand span { color: var(--kimp); }
+    nav.top a.link { color: var(--muted); font-size: 14px; }
+    nav.top a.link:hover { color: var(--text); text-decoration: none; }
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 20px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+    footer .links { margin-bottom: 8px; }
+    footer .links a { margin-right: 14px; }
+    footer .disclosure { color: var(--dim); max-width: 720px; }
+    .prose {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+    }
+    .prose h1 { font-size: 26px; margin: 8px 0 16px; }
+    .prose h2 { font-size: 20px; margin: 32px 0 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    .prose h3 { font-size: 16px; margin: 20px 0 8px; }
+    .prose p { margin: 8px 0 12px; color: #c9d1d9; }
+    .prose ul, .prose ol { padding-left: 22px; color: #c9d1d9; }
+    .prose li { margin: 4px 0; }
+    .prose table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      font-size: 13px;
+    }
+    .prose th, .prose td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    .prose th { background: #1c2128; color: var(--muted); font-weight: 600; font-size: 12px; }
+    .prose tr:last-child td { border-bottom: 0; }
+    .cta-banner {
+      background: linear-gradient(90deg, #0b1f11 0%, #102a1a 100%);
+      border: 1px solid #1f4a2b;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 14px 20px;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .cta-banner .text { flex: 1 1 260px; min-width: 0; }
+    .cta-banner .text strong { color: var(--kimp); }
+    .cta-banner .text small { color: var(--muted); display: block; margin-top: 2px; font-size: 12px; }
+    .cta-banner .buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn {
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 5px;
+      background: var(--kimp);
+      color: white;
+      font-weight: 600;
+      font-size: 13px;
+      border: 0;
+      cursor: pointer;
+    }
+    .btn:hover { text-decoration: none; opacity: 0.9; }
+    .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn.ghost:hover { border-color: var(--muted); }
+    @media (max-width: 640px) {
+      nav.top { padding: 8px 12px; gap: 12px; }
+      nav.top .brand { font-size: 14px; }
+      nav.top a.link { font-size: 12px; }
+      .cta-banner { margin: 10px 8px; padding: 10px 12px; }
+      .prose { padding: 16px 14px 40px; }
+      .prose h1 { font-size: 22px; }
+      .prose h2 { font-size: 17px; }
+    }
+    {% block extra_styles %}{% endblock %}
+  </style>
+</head>
+<body>
+<nav class="top">
+  <a href="/" class="brand">김<span>프</span> 모니터</a>
+  <a href="/" class="link">실시간</a>
+  <a href="/guide/kimp" class="link">김프란?</a>
+  <a href="/guide/fees" class="link">수수료 비교</a>
+  <a href="/guide/exchanges" class="link">거래소 추천</a>
+</nav>
+
+{% block body %}{% endblock %}
+
+<footer>
+  <div class="links">
+    <a href="/">실시간 김프</a>
+    <a href="/guide/kimp">김프란?</a>
+    <a href="/guide/fees">수수료 비교</a>
+    <a href="/guide/exchanges">거래소 추천</a>
+  </div>
+  <div class="disclosure">
+    본 사이트는 정보 제공 목적이며 투자 권유가 아닙니다. 모든 투자 결정의 책임은 이용자 본인에게 있습니다.
+    거래소 링크 중 일부는 제휴(Affiliate) 링크이며, 이용자가 가입·거래할 경우 사이트가 수수료 일부를 환급받을 수 있습니다.
+    시세 데이터는 Upbit·Bybit·OKX·Binance 공개 API 및 환율 공공 API에서 수집되며, 지연·오류 가능성이 있습니다.
+  </div>
+</footer>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

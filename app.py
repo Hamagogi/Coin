@@ -1,4 +1,4 @@
-"""Flask 웹 대시보드 — 김프/역프 실시간 표시."""
+"""Flask 웹 대시보드 — 김프/역프 실시간 표시 + 콘텐츠 페이지."""
 from __future__ import annotations
 
 import argparse
@@ -8,8 +8,9 @@ import time
 from datetime import datetime
 from dataclasses import asdict
 
-from flask import Flask, jsonify, render_template
+from flask import Flask, Response, jsonify, render_template
 
+import config
 import forex
 import overseas
 import upbit
@@ -21,6 +22,29 @@ app = Flask(__name__)
 
 _cache_lock = threading.Lock()
 _cache: dict = {"ts": 0.0, "payload": None, "error": None}
+
+
+@app.context_processor
+def inject_site_globals() -> dict:
+    """모든 템플릿에서 쓸 수 있는 사이트 메타·설정 주입."""
+    return {
+        "site_url": config.SITE_URL,
+        "site_name": config.SITE_NAME,
+        "site_description": config.SITE_DESCRIPTION,
+        "site_keywords": config.SITE_KEYWORDS,
+        "ga_id": config.GA_MEASUREMENT_ID,
+        "clarity_id": config.CLARITY_PROJECT_ID,
+        "exchanges": config.exchanges_info(),
+        "exchange_home": config.exchange_home,
+        "exchange_spot": config.exchange_spot,
+        "refs": {
+            "bybit": os.environ.get("BYBIT_REF", ""),
+            "okx": os.environ.get("OKX_REF", ""),
+            "bitget": os.environ.get("BITGET_REF", ""),
+            "binance": os.environ.get("BINANCE_REF", ""),
+            "mexc": os.environ.get("MEXC_REF", ""),
+        },
+    }
 
 
 def _build_snapshot() -> dict:
@@ -51,7 +75,7 @@ def _get_snapshot() -> tuple[dict | None, str | None]:
 
     try:
         payload = _build_snapshot()
-    except Exception as exc:  # network / API 장애를 UI로 전달
+    except Exception as exc:
         with _cache_lock:
             _cache["error"] = f"{type(exc).__name__}: {exc}"
         return _cache["payload"], _cache["error"]
@@ -68,6 +92,21 @@ def index() -> str:
     return render_template("index.html")
 
 
+@app.route("/guide/kimp")
+def guide_kimp() -> str:
+    return render_template("guide_kimp.html")
+
+
+@app.route("/guide/fees")
+def guide_fees() -> str:
+    return render_template("guide_fees.html")
+
+
+@app.route("/guide/exchanges")
+def guide_exchanges() -> str:
+    return render_template("guide_exchanges.html")
+
+
 @app.route("/api/spreads")
 def api_spreads():
     payload, error = _get_snapshot()
@@ -77,6 +116,37 @@ def api_spreads():
     if error:
         response["warning"] = error
     return jsonify(response)
+
+
+@app.route("/robots.txt")
+def robots() -> Response:
+    body = (
+        "User-agent: *\n"
+        "Allow: /\n"
+        "Disallow: /api/\n"
+        f"Sitemap: {config.SITE_URL}/sitemap.xml\n"
+    )
+    return Response(body, mimetype="text/plain")
+
+
+@app.route("/sitemap.xml")
+def sitemap() -> Response:
+    pages = ["/", "/guide/kimp", "/guide/fees", "/guide/exchanges"]
+    today = datetime.utcnow().strftime("%Y-%m-%d")
+    urls = "".join(
+        f"<url><loc>{config.SITE_URL}{p}</loc>"
+        f"<lastmod>{today}</lastmod>"
+        f"<changefreq>{'always' if p == '/' else 'weekly'}</changefreq>"
+        f"<priority>{'1.0' if p == '/' else '0.7'}</priority></url>"
+        for p in pages
+    )
+    body = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+        f"{urls}"
+        "</urlset>"
+    )
+    return Response(body, mimetype="application/xml")
 
 
 def main() -> None:

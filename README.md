@@ -90,8 +90,53 @@ net_profit%  = |premium%| - upbit_taker_fee% - overseas_taker_fee%
 ## 데이터 소스
 
 - Upbit REST: `GET /v1/market/all`, `GET /v1/ticker`
-- Binance REST: `GET /api/v3/ticker/price`
+- 해외 거래소 폴백 체인: Binance → Bybit → OKX (첫 성공 사용)
 - USD/KRW: `open.er-api.com` (1차), `exchangerate.host` (백업)
+
+## 수익화 설정 (환경변수)
+
+모든 항목이 **선택**이다. 미설정 시 기능은 동작하고, 수익만 발생하지 않는다.
+
+### 거래소 Referral 코드
+
+각 거래소에 가입 후 파트너/affiliate 프로그램을 신청하면 코드를 받는다.
+Render 대시보드 → Service → **Environment**에 추가:
+
+| 변수 | 거래소 | 신청 페이지 |
+|---|---|---|
+| `BYBIT_REF` | Bybit | Bybit → Affiliate Program |
+| `OKX_REF` | OKX | OKX → Partner Hub |
+| `BITGET_REF` | Bitget | Bitget → Partner Program |
+| `BINANCE_REF` | Binance | Binance → Affiliate |
+| `MEXC_REF` | MEXC | MEXC → Partner Program |
+
+설정되면 상단 CTA 배너·각 코인 "매수" 버튼·가이드 페이지의 가입 링크에
+자동으로 referral 파라미터가 붙는다.
+
+### 분석 도구
+
+| 변수 | 용도 | 발급 |
+|---|---|---|
+| `GA_MEASUREMENT_ID` | Google Analytics 4 | `G-XXXXXXXXXX` 형식 |
+| `CLARITY_PROJECT_ID` | Microsoft Clarity (히트맵·세션 리플레이) | 프로젝트 대시보드 |
+
+### 사이트 메타
+
+| 변수 | 기본값 |
+|---|---|
+| `SITE_URL` | `https://coin-arbitrage.onrender.com` |
+| `SITE_NAME` | `김프 모니터` |
+
+## 페이지 구성
+
+| 경로 | 설명 |
+|---|---|
+| `/` | 실시간 김프/역프 대시보드 |
+| `/guide/kimp` | 김치 프리미엄이란? 역사·계산·차익거래 가이드 |
+| `/guide/fees` | 주요 거래소 수수료 & 출금비 비교 |
+| `/guide/exchanges` | 해외 거래소 추천 & 가입 가이드 (referral 포함) |
+| `/api/spreads` | JSON API (5초 TTL 캐시) |
+| `/robots.txt`, `/sitemap.xml` | SEO
 
 ## 주의
 
