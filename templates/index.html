@@ -121,8 +121,8 @@
         <th data-sort="direction">방향</th>
         <th data-sort="premium_pct" class="num">프리미엄 %</th>
         <th data-sort="upbit_krw" class="num">Upbit (KRW)</th>
-        <th data-sort="binance_usdt" class="num">Binance (USDT)</th>
-        <th data-sort="binance_krw" class="num">Binance (KRW)</th>
+        <th data-sort="binance_usdt" class="num" id="th-overseas-usdt">해외 (USDT)</th>
+        <th data-sort="binance_krw" class="num" id="th-overseas-krw">해외 (KRW)</th>
       </tr>
     </thead>
     <tbody id="rows"></tbody>
@@ -203,8 +203,11 @@ async function refresh() {
       warn.style.display = "none";
     }
     lastData = data;
+    const src = (data.overseas_source || "?").toUpperCase();
     document.getElementById("status").textContent =
-      `업데이트 ${data.updated_at} · USD/KRW ${fmt(data.usd_krw, 2)} · 공통 ${data.common_count}종`;
+      `업데이트 ${data.updated_at} · USD/KRW ${fmt(data.usd_krw, 2)} · 해외 ${src} · 공통 ${data.common_count}종`;
+    document.getElementById("th-overseas-usdt").textContent = `${src} (USDT)`;
+    document.getElementById("th-overseas-krw").textContent = `${src} (KRW)`;
     applyFiltersAndRender();
   } catch (err) {
     const warn = document.getElementById("warning");

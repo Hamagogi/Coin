@@ -10,8 +10,8 @@ from dataclasses import asdict
 
 from flask import Flask, jsonify, render_template
 
-import binance
 import forex
+import overseas
 import upbit
 from arbitrage import compute_spreads
 
@@ -26,13 +26,14 @@ _cache: dict = {"ts": 0.0, "payload": None, "error": None}
 def _build_snapshot() -> dict:
     upbit_symbols = upbit.fetch_krw_markets()
     upbit_prices = upbit.fetch_tickers(upbit_symbols)
-    binance_prices = binance.fetch_usdt_tickers()
+    overseas_source, overseas_prices = overseas.fetch_usdt_tickers()
     usd_krw = forex.fetch_usd_krw()
-    spreads = compute_spreads(upbit_prices, binance_prices, usd_krw)
+    spreads = compute_spreads(upbit_prices, overseas_prices, usd_krw)
     spreads.sort(key=lambda s: s.premium_pct, reverse=True)
     return {
         "updated_at": datetime.now().isoformat(timespec="seconds"),
         "usd_krw": usd_krw,
+        "overseas_source": overseas_source,
         "common_count": len(spreads),
         "spreads": [
             {**asdict(s), "direction": s.direction} for s in spreads

@@ -1,4 +1,4 @@
-"""Upbit vs Binance 차익거래 모니터링 루프."""
+"""Upbit vs 해외 거래소 차익거래 모니터링 루프."""
 from __future__ import annotations
 
 import argparse
@@ -8,8 +8,8 @@ from datetime import datetime
 
 import requests
 
-import binance
 import forex
+import overseas
 import upbit
 from arbitrage import Spread, compute_spreads
 
@@ -22,18 +22,25 @@ def format_usdt(value: float) -> str:
     return f"{value:>12,.4f}"
 
 
-def render(spreads: list[Spread], usd_krw: float, top: int, min_abs_pct: float) -> str:
+def render(
+    spreads: list[Spread],
+    usd_krw: float,
+    source: str,
+    top: int,
+    min_abs_pct: float,
+) -> str:
     filtered = [s for s in spreads if abs(s.premium_pct) >= min_abs_pct]
     filtered.sort(key=lambda s: s.premium_pct, reverse=True)
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     header = (
-        f"[{now}] USD/KRW={usd_krw:,.2f}  "
+        f"[{now}] USD/KRW={usd_krw:,.2f}  overseas={source.upper()}  "
         f"common={len(spreads)}  shown={min(len(filtered), top * 2)}"
     )
+    src = source.upper()[:7]
     col_header = (
         f"{'SYMBOL':<8} {'DIR':<7} {'PREM%':>8}  "
-        f"{'UPBIT(KRW)':>14}  {'BINANCE(USDT)':>12}  {'BINANCE(KRW)':>14}"
+        f"{'UPBIT(KRW)':>14}  {src + '(USDT)':>13}  {src + '(KRW)':>14}"
     )
 
     def row(s: Spread) -> str:
@@ -61,14 +68,14 @@ def render(spreads: list[Spread], usd_krw: float, top: int, min_abs_pct: float) 
 def run_once(top: int, min_abs_pct: float) -> None:
     upbit_symbols = upbit.fetch_krw_markets()
     upbit_prices = upbit.fetch_tickers(upbit_symbols)
-    binance_prices = binance.fetch_usdt_tickers()
+    source, overseas_prices = overseas.fetch_usdt_tickers()
     usd_krw = forex.fetch_usd_krw()
-    spreads = compute_spreads(upbit_prices, binance_prices, usd_krw)
-    print(render(spreads, usd_krw, top, min_abs_pct))
+    spreads = compute_spreads(upbit_prices, overseas_prices, usd_krw)
+    print(render(spreads, usd_krw, source, top, min_abs_pct))
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Upbit vs Binance 김프/역프 모니터")
+    parser = argparse.ArgumentParser(description="Upbit vs 해외 거래소 김프/역프 모니터")
     parser.add_argument("--interval", type=float, default=10.0, help="폴링 주기(초)")
     parser.add_argument("--top", type=int, default=10, help="각 방향 표시 개수")
     parser.add_argument(
