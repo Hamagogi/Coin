@@ -1,50 +1,42 @@
-// 경품 스폰 — 박스 형태로 캐비닛 안에 무작위 배치.
+// 경품 — 봉 위에 얹힌 상태로 1개 스폰.
+// 사이즈는 봉 간격보다 살짝 큼 (양쪽 봉에 걸쳐짐).
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 import { CABINET } from './cabinet.js';
 
-const PRIZE_SIZE = 0.085;  // 한 변
-
-const COLORS = [0xff5757, 0x57c2ff, 0xffce57, 0x9d57ff, 0x57ff8a, 0xff9357, 0xff57c8];
+const COLORS = [0xff5757, 0x57c2ff, 0xffce57, 0x9d57ff, 0x57ff8a, 0xff9357];
 
 export function createPrizeSpawner(scene, world, materials) {
-  const prizes = []; // { body, mesh }
+  const prizes = []; // { body, mesh, size }
 
-  function spawnOne(mass) {
-    const half = PRIZE_SIZE / 2;
+  function spawnOne({ size, mass, x, z }) {
+    const half = size / 2;
     const shape = new CANNON.Box(new CANNON.Vec3(half, half, half));
     const body = new CANNON.Body({
       mass,
       shape,
       material: materials.prize,
       linearDamping: 0.05,
-      angularDamping: 0.1,
+      angularDamping: 0.15,
       allowSleep: true,
-      sleepSpeedLimit: 0.05,
+      sleepSpeedLimit: 0.04,
       sleepTimeLimit: 0.5,
     });
-    // 캐비닛 안 무작위 위치 (구멍 영역 피함 — 전반부 X쪽으로)
-    const x = (Math.random() - 0.5) * (CABINET.W - 0.2);
-    const y = 0.4 + Math.random() * 0.2;
-    const z = (Math.random() - 0.5) * (CABINET.D - 0.2);
-    body.position.set(x, y, z);
-    body.quaternion.setFromEuler(
-      Math.random() * Math.PI,
-      Math.random() * Math.PI,
-      Math.random() * Math.PI,
-    );
+    // 봉 위에 약간 띄워 놓음 (떨어지면서 봉에 안착)
+    const yOnBars = CABINET.BAR_HEIGHT + 0.02 + half;
+    body.position.set(x, yOnBars, z);
     world.addBody(body);
 
     const color = COLORS[prizes.length % COLORS.length];
     const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(PRIZE_SIZE, PRIZE_SIZE, PRIZE_SIZE),
-      new THREE.MeshStandardMaterial({ color, roughness: 0.6, metalness: 0.05 }),
+      new THREE.BoxGeometry(size, size, size),
+      new THREE.MeshStandardMaterial({ color, roughness: 0.55, metalness: 0.05 }),
     );
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     scene.add(mesh);
 
-    const prize = { body, mesh, _grabbedBy: 0 };
+    const prize = { body, mesh, size };
     prizes.push(prize);
     return prize;
   }
@@ -59,9 +51,14 @@ export function createPrizeSpawner(scene, world, materials) {
     prizes.length = 0;
   }
 
-  function spawn(count, mass) {
+  function spawn({ count, size, mass }) {
     clearAll();
-    for (let i = 0; i < count; i++) spawnOne(mass);
+    // 봉 위에 일렬로 배치 (Z 방향)
+    const span = CABINET.D - 0.10;
+    for (let i = 0; i < count; i++) {
+      const z = count === 1 ? 0 : -span / 2 + (i + 0.5) * (span / count);
+      spawnOne({ size, mass, x: 0, z });
+    }
   }
 
   function syncMeshes() {
@@ -71,7 +68,5 @@ export function createPrizeSpawner(scene, world, materials) {
     }
   }
 
-  return { spawn, clearAll, syncMeshes, prizes };
+  return { spawn, spawnOne, clearAll, syncMeshes, prizes };
 }
-
-export { PRIZE_SIZE };

@@ -1,72 +1,54 @@
-// 캐비닛(외함) — 바닥 4분할로 한 모서리에 구멍을 만든다.
-// 모서리 구멍 좌표는 (+x, +z) 코너. 그 아래로 떨어지면 획득 판정.
+// 캐비닛 (橋渡し / 하시와타시 모드)
+//
+// 구성:
+//   - 벽 4면 (좌/우/앞/뒤, 시각용 유리)
+//   - 평탄한 바닥 (받침)
+//   - 봉 2개 (Z축 방향 원통형, 평행)
+//   - 봉 사이 간격으로 경품이 떨어지면 win
+//
+// 봉의 X 좌표: ±gap/2 (중심 대칭)
+// 봉의 Y 좌표: BAR_HEIGHT
+// 봉의 길이: 캐비닛 깊이만큼 (Z방향)
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 
 export const CABINET = {
-  W: 0.7,          // x폭
-  D: 0.7,          // z깊이
-  H: 0.8,          // y높이
-  WALL_T: 0.02,    // 벽 두께
-  HOLE_W: 0.16,    // 구멍 가로
-  HOLE_D: 0.16,    // 구멍 깊이
+  W: 0.7,
+  D: 0.7,
+  H: 0.8,
+  WALL_T: 0.02,
+  BAR_HEIGHT: 0.30,        // 바닥에서 봉 중심까지 높이
 };
 
 export function createCabinet(scene, world, materials) {
-  const { W, D, H, WALL_T, HOLE_W, HOLE_D } = CABINET;
+  const { W, D, H, WALL_T } = CABINET;
   const halfW = W / 2;
   const halfD = D / 2;
 
   const wallVisMat = new THREE.MeshPhysicalMaterial({
-    color: 0x66bbff, transparent: true, opacity: 0.12,
-    roughness: 0.05, metalness: 0, transmission: 0.9, thickness: 0.5,
+    color: 0x66bbff, transparent: true, opacity: 0.10,
+    roughness: 0.05, metalness: 0, transmission: 0.92, thickness: 0.5,
     side: THREE.DoubleSide,
   });
   const frameMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.6 });
-  const floorMat = new THREE.MeshStandardMaterial({ color: 0x222831, roughness: 0.8 });
-  const holeMat  = new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 1 });
+  const floorMat = new THREE.MeshStandardMaterial({ color: 0x1a1f27, roughness: 0.85 });
 
-  // ─── 바닥 (구멍 4분할) ────────────────────────────────────────────
-  // 구멍은 (+x 끝, +z 끝) 모서리.
-  const holeMinX = halfW - HOLE_W;
-  const holeMinZ = halfD - HOLE_D;
+  // ─── 바닥 (평탄, 구멍 없음) ──────────────────────────────────────
+  const floorShape = new CANNON.Box(new CANNON.Vec3(W / 2, WALL_T / 2, D / 2));
+  const floorBody = new CANNON.Body({ mass: 0, material: materials.floor, shape: floorShape });
+  floorBody.position.set(0, WALL_T / 2, 0);
+  world.addBody(floorBody);
 
-  const floorPieces = [
-    // 1) 큰 구역 — x: [-W/2, holeMinX], z: 전체
-    { sx: holeMinX + halfW, sz: D, cx: (-halfW + holeMinX) / 2, cz: 0 },
-    // 2) 우측 좁은 띠 — x: [holeMinX, +W/2], z: [-D/2, holeMinZ]
-    { sx: HOLE_W, sz: holeMinZ + halfD, cx: (holeMinX + halfW) / 2, cz: (-halfD + holeMinZ) / 2 },
-  ];
-  for (const p of floorPieces) {
-    const shape = new CANNON.Box(new CANNON.Vec3(p.sx / 2, WALL_T / 2, p.sz / 2));
-    const body = new CANNON.Body({ mass: 0, material: materials.floor, shape });
-    body.position.set(p.cx, WALL_T / 2, p.cz);
-    world.addBody(body);
+  const floorMesh = new THREE.Mesh(new THREE.BoxGeometry(W, WALL_T, D), floorMat);
+  floorMesh.position.copy(floorBody.position);
+  floorMesh.receiveShadow = true;
+  scene.add(floorMesh);
 
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(p.sx, WALL_T, p.sz), floorMat);
-    mesh.position.copy(body.position);
-    mesh.receiveShadow = true;
-    scene.add(mesh);
-  }
-
-  // 구멍 자리 시각화 (검정 사각형)
-  const holeMesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(HOLE_W, HOLE_D),
-    holeMat,
-  );
-  holeMesh.rotation.x = -Math.PI / 2;
-  holeMesh.position.set(holeMinX + HOLE_W / 2, 0.001, holeMinZ + HOLE_D / 2);
-  scene.add(holeMesh);
-
-  // ─── 벽 (4면, 유리 시각화) ────────────────────────────────────────
+  // ─── 벽 4면 ────────────────────────────────────────────────────
   const walls = [
-    // 좌
     { sx: WALL_T, sy: H, sz: D, cx: -halfW, cy: H / 2, cz: 0 },
-    // 우
     { sx: WALL_T, sy: H, sz: D, cx: +halfW, cy: H / 2, cz: 0 },
-    // 뒤(z+)
     { sx: W, sy: H, sz: WALL_T, cx: 0, cy: H / 2, cz: +halfD },
-    // 앞(z-)
     { sx: W, sy: H, sz: WALL_T, cx: 0, cy: H / 2, cz: -halfD },
   ];
   for (const w of walls) {
@@ -75,10 +57,7 @@ export function createCabinet(scene, world, materials) {
     body.position.set(w.cx, w.cy, w.cz);
     world.addBody(body);
 
-    const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(w.sx, w.sy, w.sz),
-      wallVisMat,
-    );
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w.sx, w.sy, w.sz), wallVisMat);
     mesh.position.copy(body.position);
     scene.add(mesh);
   }
@@ -91,22 +70,55 @@ export function createCabinet(scene, world, materials) {
   topFrame.position.set(0, H + 0.02, 0);
   scene.add(topFrame);
 
-  // ─── 슈트 콜렉터 (구멍 아래) ─────────────────────────────────────
-  // 구멍 아래에 트리거 박스: 경품이 닿으면 win 카운트.
-  // 콜리전은 받지만 탄성은 0 으로 해서 즉시 정지.
-  const chuteY = -0.15;
-  const chuteShape = new CANNON.Box(new CANNON.Vec3(HOLE_W / 2, 0.01, HOLE_D / 2));
-  const chuteBody = new CANNON.Body({ mass: 0, material: materials.floor, shape: chuteShape });
-  chuteBody.position.set(holeMinX + HOLE_W / 2, chuteY, holeMinZ + HOLE_D / 2);
-  chuteBody.userData = { isChute: true };
-  world.addBody(chuteBody);
+  // ─── 봉 (원통형, Z축 방향) ──────────────────────────────────────
+  // 동적으로 재생성 가능하도록 별도 함수 + 참조 보관
+  const barRefs = { bodies: [], meshes: [] };
+
+  function buildBars(gap, radius) {
+    // 기존 제거
+    for (const b of barRefs.bodies) world.removeBody(b);
+    for (const m of barRefs.meshes) {
+      scene.remove(m);
+      m.geometry.dispose();
+      m.material.dispose();
+    }
+    barRefs.bodies = [];
+    barRefs.meshes = [];
+
+    const length = D - 0.02;             // 캐비닛 깊이에 살짝 못 미치게
+    const xs = [-gap / 2, +gap / 2];
+    const barMat = new THREE.MeshStandardMaterial({
+      color: 0xb8bcc4, roughness: 0.25, metalness: 0.95,
+    });
+
+    for (const x of xs) {
+      // Cannon Cylinder는 기본 Y축. X축 회전(-π/2)로 Z축 정렬.
+      const shape = new CANNON.Cylinder(radius, radius, length, 16);
+      const body = new CANNON.Body({ mass: 0, material: materials.bar, shape });
+      const q = new CANNON.Quaternion();
+      q.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2);
+      body.quaternion.copy(q);
+      body.position.set(x, CABINET.BAR_HEIGHT, 0);
+      world.addBody(body);
+
+      const mesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(radius, radius, length, 24),
+        barMat,
+      );
+      mesh.rotation.x = Math.PI / 2;
+      mesh.position.set(x, CABINET.BAR_HEIGHT, 0);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      scene.add(mesh);
+
+      barRefs.bodies.push(body);
+      barRefs.meshes.push(mesh);
+    }
+  }
 
   return {
-    holeCenter: new THREE.Vector3(
-      holeMinX + HOLE_W / 2,
-      0,
-      holeMinZ + HOLE_D / 2,
-    ),
-    chuteBody,
+    buildBars,
+    barRefs,
+    barHeight: CABINET.BAR_HEIGHT,
   };
 }
