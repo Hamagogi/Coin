@@ -1,16 +1,22 @@
-// UI 슬라이더 ↔ 런타임 설정 바인딩.
+// UI 슬라이더 ↔ 런타임 설정 바인딩 (4봉 하시와타시).
 export function createSettings(callbacks = {}) {
   const settings = {
     armForce: 3.0,
     friction: 0.5,            // claw ↔ prize
-    barFriction: 0.4,         // bar ↔ prize (하시와타시 핵심 변수)
     liftSpeed: 0.4,
     moveSpeed: 0.5,
     prizeMass: 0.20,
-    prizeSize: 0.10,          // 경품 한 변 길이
+    prizeSize: 0.10,
     prizeCount: 1,
-    barGap: 0.06,             // 봉 사이 간격
-    barRadius: 0.008,         // 봉 굵기 (반지름)
+
+    // 봉 (4개 구성)
+    innerGap: 0.060,          // 안쪽 봉 사이 간격 (떨어지는 갭)
+    outerWidth: 0.220,        // 바깥 봉 사이 거리 (가드 레일 폭)
+    outerOffset: 0.008,       // 바깥 봉이 안쪽보다 높은 정도
+    barRadius: 0.008,
+    innerFriction: 0.50,      // 안쪽 봉 ↔ 경품 (높음 = 안정)
+    outerFriction: 0.10,      // 바깥 봉 ↔ 경품 (낮음 = 매끈)
+
     assistEnabled: false,
     assistForce: 8.0,
     assistAfter: 10,
@@ -39,18 +45,23 @@ export function createSettings(callbacks = {}) {
     });
   }
 
-  bindRange('armForce',    'armForce',    parseFloat,             (v) => v.toFixed(1));
-  bindRange('friction',    'friction',    parseFloat,             (v) => v.toFixed(2));
-  bindRange('barFriction', 'barFriction', parseFloat,             (v) => v.toFixed(2));
-  bindRange('liftSpeed',   'liftSpeed',   parseFloat,             (v) => v.toFixed(2));
-  bindRange('moveSpeed',   'moveSpeed',   parseFloat,             (v) => v.toFixed(2));
-  bindRange('prizeMass',   'prizeMass',   parseFloat,             (v) => v.toFixed(2));
-  bindRange('prizeSize',   'prizeSize',   parseFloat,             (v) => v.toFixed(3));
-  bindRange('prizeCount',  'prizeCount',  (v) => parseInt(v, 10), (v) => String(v));
-  bindRange('barGap',      'barGap',      parseFloat,             (v) => v.toFixed(3));
-  bindRange('barRadius',   'barRadius',   parseFloat,             (v) => v.toFixed(3));
-  bindRange('assistForce', 'assistForce', parseFloat,             (v) => v.toFixed(1));
-  bindRange('assistAfter', 'assistAfter', (v) => parseInt(v, 10), (v) => String(v));
+  bindRange('armForce',      'armForce',      parseFloat,             (v) => v.toFixed(1));
+  bindRange('friction',      'friction',      parseFloat,             (v) => v.toFixed(2));
+  bindRange('liftSpeed',     'liftSpeed',     parseFloat,             (v) => v.toFixed(2));
+  bindRange('moveSpeed',     'moveSpeed',     parseFloat,             (v) => v.toFixed(2));
+  bindRange('prizeMass',     'prizeMass',     parseFloat,             (v) => v.toFixed(2));
+  bindRange('prizeSize',     'prizeSize',     parseFloat,             (v) => v.toFixed(3));
+  bindRange('prizeCount',    'prizeCount',    (v) => parseInt(v, 10), (v) => String(v));
+
+  bindRange('innerGap',      'innerGap',      parseFloat,             (v) => v.toFixed(3));
+  bindRange('outerWidth',    'outerWidth',    parseFloat,             (v) => v.toFixed(3));
+  bindRange('outerOffset',   'outerOffset',   parseFloat,             (v) => v.toFixed(3));
+  bindRange('barRadius',     'barRadius',     parseFloat,             (v) => v.toFixed(3));
+  bindRange('innerFriction', 'innerFriction', parseFloat,             (v) => v.toFixed(2));
+  bindRange('outerFriction', 'outerFriction', parseFloat,             (v) => v.toFixed(2));
+
+  bindRange('assistForce',   'assistForce',   parseFloat,             (v) => v.toFixed(1));
+  bindRange('assistAfter',   'assistAfter',   (v) => parseInt(v, 10), (v) => String(v));
   bindCheckbox('assistEnabled', 'assistEnabled');
 
   return settings;

@@ -14,11 +14,12 @@ export function createWorld() {
   world.defaultContactMaterial.contactEquationStiffness = 1e8;
 
   const materials = {
-    floor: new CANNON.Material('floor'),
-    wall:  new CANNON.Material('wall'),
-    bar:   new CANNON.Material('bar'),    // 하시와타시 봉
-    claw:  new CANNON.Material('claw'),
-    prize: new CANNON.Material('prize'),
+    floor:    new CANNON.Material('floor'),
+    wall:     new CANNON.Material('wall'),
+    barInner: new CANNON.Material('barInner'),  // 안쪽 봉 (고마찰, 경품을 받침)
+    barOuter: new CANNON.Material('barOuter'),  // 바깥 봉 (저마찰, 가드 레일)
+    claw:     new CANNON.Material('claw'),
+    prize:    new CANNON.Material('prize'),
   };
 
   const clawPrize = new CANNON.ContactMaterial(materials.claw, materials.prize, {
@@ -37,17 +38,22 @@ export function createWorld() {
     friction: 0.3,
     restitution: 0.1,
   });
-  // 하시와타시 핵심: 봉↔경품 마찰. 작을수록 미끄러져 봉 사이로 잘 빠짐.
-  const prizeBar = new CANNON.ContactMaterial(materials.prize, materials.bar, {
-    friction: 0.4,
-    restitution: 0.05,
+  // 안쪽 봉: 경품을 안정적으로 받쳐야 함 → 마찰 높음
+  const prizeBarInner = new CANNON.ContactMaterial(materials.prize, materials.barInner, {
+    friction: 0.50,
+    restitution: 0.04,
   });
-  for (const m of [clawPrize, prizePrize, prizeFloor, prizeWall, prizeBar]) {
+  // 바깥 봉: 측면 가드. 매끈해서 경품이 미끄러져 안 걸림
+  const prizeBarOuter = new CANNON.ContactMaterial(materials.prize, materials.barOuter, {
+    friction: 0.10,
+    restitution: 0.04,
+  });
+  for (const m of [clawPrize, prizePrize, prizeFloor, prizeWall, prizeBarInner, prizeBarOuter]) {
     world.addContactMaterial(m);
   }
 
   return {
     world, materials,
-    contacts: { clawPrize, prizePrize, prizeFloor, prizeWall, prizeBar },
+    contacts: { clawPrize, prizePrize, prizeFloor, prizeWall, prizeBarInner, prizeBarOuter },
   };
 }

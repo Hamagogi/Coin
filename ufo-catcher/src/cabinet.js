@@ -1,14 +1,12 @@
-// 캐비닛 (橋渡し / 하시와타시 모드)
+// 캐비닛 (橋渡し / 하시와타시 — 4봉 구성)
 //
-// 구성:
-//   - 벽 4면 (좌/우/앞/뒤, 시각용 유리)
-//   - 평탄한 바닥 (받침)
-//   - 봉 2개 (Z축 방향 원통형, 평행)
-//   - 봉 사이 간격으로 경품이 떨어지면 win
+// 봉 배치 (X축 기준, Z축으로 길게 누움):
+//   바깥 좌  안쪽 좌  안쪽 우  바깥 우
+//   ●        ●        ●        ●
+//   매끈     고마찰   고마찰    매끈
+//   살짝높음 기준높이 기준높이  살짝높음
 //
-// 봉의 X 좌표: ±gap/2 (중심 대칭)
-// 봉의 Y 좌표: BAR_HEIGHT
-// 봉의 길이: 캐비닛 깊이만큼 (Z방향)
+// 안쪽 두 봉이 경품을 받치고, 바깥 두 봉은 측면 가드 역할 (살짝 높아 경품의 측면 이탈 방지).
 import * as THREE from 'three';
 import * as CANNON from 'cannon-es';
 
@@ -17,7 +15,7 @@ export const CABINET = {
   D: 0.7,
   H: 0.8,
   WALL_T: 0.02,
-  BAR_HEIGHT: 0.30,        // 바닥에서 봉 중심까지 높이
+  BAR_HEIGHT: 0.30,        // 안쪽 봉 중심 높이
 };
 
 export function createCabinet(scene, world, materials) {
@@ -70,11 +68,10 @@ export function createCabinet(scene, world, materials) {
   topFrame.position.set(0, H + 0.02, 0);
   scene.add(topFrame);
 
-  // ─── 봉 (원통형, Z축 방향) ──────────────────────────────────────
-  // 동적으로 재생성 가능하도록 별도 함수 + 참조 보관
+  // ─── 봉 (4개) ─────────────────────────────────────────────────
   const barRefs = { bodies: [], meshes: [] };
 
-  function buildBars(gap, radius) {
+  function buildBars({ innerGap, outerWidth, outerOffset, radius }) {
     // 기존 제거
     for (const b of barRefs.bodies) world.removeBody(b);
     for (const m of barRefs.meshes) {
@@ -86,27 +83,37 @@ export function createCabinet(scene, world, materials) {
     barRefs.meshes = [];
 
     const length = D - 0.02;             // 캐비닛 깊이에 살짝 못 미치게
-    const xs = [-gap / 2, +gap / 2];
-    const barMat = new THREE.MeshStandardMaterial({
-      color: 0xb8bcc4, roughness: 0.25, metalness: 0.95,
+
+    const innerMat = new THREE.MeshStandardMaterial({
+      color: 0xc0c4cc, roughness: 0.55, metalness: 0.7,    // 살짝 거친 질감
+    });
+    const outerMat = new THREE.MeshStandardMaterial({
+      color: 0xe8ecf2, roughness: 0.10, metalness: 0.95,   // 매끈하고 광택
     });
 
-    for (const x of xs) {
-      // Cannon Cylinder는 기본 Y축. X축 회전(-π/2)로 Z축 정렬.
+    const definitions = [
+      { x: -innerGap / 2,   y: CABINET.BAR_HEIGHT,                 mat: materials.barInner, vmat: innerMat, kind: 'inner' },
+      { x: +innerGap / 2,   y: CABINET.BAR_HEIGHT,                 mat: materials.barInner, vmat: innerMat, kind: 'inner' },
+      { x: -outerWidth / 2, y: CABINET.BAR_HEIGHT + outerOffset,   mat: materials.barOuter, vmat: outerMat, kind: 'outer' },
+      { x: +outerWidth / 2, y: CABINET.BAR_HEIGHT + outerOffset,   mat: materials.barOuter, vmat: outerMat, kind: 'outer' },
+    ];
+
+    for (const d of definitions) {
+      // Cannon Cylinder는 기본 Y축 정렬. X축으로 -π/2 회전 시 Z축 정렬.
       const shape = new CANNON.Cylinder(radius, radius, length, 16);
-      const body = new CANNON.Body({ mass: 0, material: materials.bar, shape });
+      const body = new CANNON.Body({ mass: 0, material: d.mat, shape });
       const q = new CANNON.Quaternion();
       q.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), Math.PI / 2);
       body.quaternion.copy(q);
-      body.position.set(x, CABINET.BAR_HEIGHT, 0);
+      body.position.set(d.x, d.y, 0);
       world.addBody(body);
 
       const mesh = new THREE.Mesh(
         new THREE.CylinderGeometry(radius, radius, length, 24),
-        barMat,
+        d.vmat,
       );
       mesh.rotation.x = Math.PI / 2;
-      mesh.position.set(x, CABINET.BAR_HEIGHT, 0);
+      mesh.position.set(d.x, d.y, 0);
       mesh.castShadow = true;
       mesh.receiveShadow = true;
       scene.add(mesh);

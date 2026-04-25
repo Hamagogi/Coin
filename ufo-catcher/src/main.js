@@ -74,7 +74,12 @@ const claw = createClaw(scene, world, materials, initialClawPos);
 const stats = { plays: 0, wins: 0, lastWin: null, consecutiveLosses: 0 };
 
 function rebuildBars() {
-  cabinet.buildBars(settings.barGap, settings.barRadius);
+  cabinet.buildBars({
+    innerGap:    settings.innerGap,
+    outerWidth:  settings.outerWidth,
+    outerOffset: settings.outerOffset,
+    radius:      settings.barRadius,
+  });
 }
 function respawnPrizes() {
   prizes.spawn({
@@ -85,18 +90,21 @@ function respawnPrizes() {
 }
 
 const settings = createSettings({
-  friction:    (v) => { contacts.clawPrize.friction = v; },
-  barFriction: (v) => { contacts.prizeBar.friction = v; },
+  friction:      (v) => { contacts.clawPrize.friction = v; },
+  innerFriction: (v) => { contacts.prizeBarInner.friction = v; },
+  outerFriction: (v) => { contacts.prizeBarOuter.friction = v; },
   prizeMass: (v) => {
     for (const p of prizes.prizes) {
       p.body.mass = v;
       p.body.updateMassProperties();
     }
   },
-  prizeSize: () => respawnPrizes(),
-  prizeCount: () => respawnPrizes(),
-  barGap:    () => { rebuildBars(); respawnPrizes(); },
-  barRadius: () => { rebuildBars(); respawnPrizes(); },
+  prizeSize:   () => respawnPrizes(),
+  prizeCount:  () => respawnPrizes(),
+  innerGap:    () => { rebuildBars(); respawnPrizes(); },
+  outerWidth:  () => { rebuildBars(); respawnPrizes(); },
+  outerOffset: () => { rebuildBars(); respawnPrizes(); },
+  barRadius:   () => { rebuildBars(); respawnPrizes(); },
 });
 
 // 초기 봉 + 경품

@@ -120,9 +120,11 @@ export function createClaw(scene, world, materials, initialPos) {
   }
 
   function setHubPosition(x, y, z) {
-    // 키네매틱 바디는 velocity로 움직이는 것이 안정적.
-    // 단, 이 시뮬레이터는 위치 직접 설정으로 충분.
+    // 키네매틱 hub: 위치 직접 설정 + 회전·각속도 리셋해 hinge 반력 누적 방지.
     hubBody.position.set(x, y, z);
+    hubBody.velocity.set(0, 0, 0);
+    hubBody.angularVelocity.set(0, 0, 0);
+    hubBody.quaternion.set(0, 0, 0, 1);
   }
 
   function setHubVelocity(vx, vy, vz) {
