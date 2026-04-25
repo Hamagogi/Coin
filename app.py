@@ -8,7 +8,7 @@ import time
 from datetime import datetime
 from dataclasses import asdict
 
-from flask import Flask, Response, jsonify, render_template
+from flask import Flask, Response, jsonify, render_template, send_from_directory
 
 import config
 import forex
@@ -17,6 +17,8 @@ import upbit
 from arbitrage import compute_spreads
 
 CACHE_TTL_SECONDS = 5.0
+
+UFO_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ufo-catcher")
 
 app = Flask(__name__)
 
@@ -105,6 +107,13 @@ def guide_fees() -> str:
 @app.route("/guide/exchanges")
 def guide_exchanges() -> str:
     return render_template("guide_exchanges.html")
+
+
+@app.route("/ufo-catcher/")
+@app.route("/ufo-catcher/<path:subpath>")
+def ufo_catcher(subpath: str = "index.html") -> Response:
+    """UFO Catcher 시뮬레이터 정적 파일 서빙."""
+    return send_from_directory(UFO_DIR, subpath)
 
 
 @app.route("/api/spreads")
