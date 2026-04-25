@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UFO Catcher 시뮬레이터 (2발톱)</title>
+  <style>
+    :root {
+      --bg: #0e1116;
+      --panel: rgba(20, 24, 33, 0.92);
+      --border: #2a313c;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --accent: #2ea043;
+      --warn: #f85149;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+    #canvas { display: block; width: 100vw; height: 100vh; }
+    #panel {
+      position: fixed; top: 0; right: 0; width: 300px; height: 100vh;
+      background: var(--panel); padding: 14px 14px 80px; overflow-y: auto;
+      border-left: 1px solid var(--border); backdrop-filter: blur(6px);
+    }
+    #panel h2 { margin: 16px 0 6px; font-size: 12px; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+    #panel h2:first-child { margin-top: 0; }
+    .slider { margin: 8px 0; }
+    .slider label { display: flex; justify-content: space-between; color: var(--muted); margin-bottom: 2px; }
+    .slider label span.val { color: var(--text); font-variant-numeric: tabular-nums; }
+    .slider input[type=range] { width: 100%; }
+    .row { display: flex; justify-content: space-between; padding: 3px 0; color: var(--muted); }
+    .row span.v { color: var(--text); font-variant-numeric: tabular-nums; font-weight: 600; }
+    .state {
+      padding: 8px; border-radius: 4px; background: #1c2128;
+      border: 1px solid var(--border); font-weight: 600; text-align: center;
+    }
+    button {
+      padding: 6px 12px; background: var(--accent); color: white; border: 0;
+      border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;
+    }
+    button.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    button:hover { opacity: 0.85; }
+    .button-row { display: flex; gap: 6px; margin-top: 8px; }
+    #help {
+      position: fixed; bottom: 12px; left: 12px;
+      background: rgba(0, 0, 0, 0.6); padding: 8px 12px;
+      border-radius: 6px; font-size: 12px; color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    #help kbd {
+      background: #1c2128; border: 1px solid var(--border);
+      border-radius: 3px; padding: 1px 5px; font-family: inherit;
+      color: var(--text); margin: 0 2px;
+    }
+    .checkbox { display: flex; align-items: center; gap: 6px; margin: 6px 0; color: var(--muted); }
+    .checkbox input { margin: 0; }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+
+<aside id="panel">
+  <h2>플레이 상태</h2>
+  <div class="state" id="state">대기 중</div>
+  <div class="button-row">
+    <button id="btn-drop">드롭 (Space)</button>
+    <button id="btn-refill" class="ghost">경품 리필</button>
+  </div>
+
+  <h2>운영자 설정 (실시간 반영)</h2>
+  <div class="slider">
+    <label>아암 힘 (Nm) <span class="val" id="armForceVal">3.0</span></label>
+    <input type="range" id="armForce" min="0.1" max="10" step="0.1" value="3.0" />
+  </div>
+  <div class="slider">
+    <label>발톱 ↔ 경품 마찰계수 <span class="val" id="frictionVal">0.5</span></label>
+    <input type="range" id="friction" min="0.05" max="2.0" step="0.05" value="0.5" />
+  </div>
+  <div class="slider">
+    <label>리프트 속도 (m/s) <span class="val" id="liftSpeedVal">0.4</span></label>
+    <input type="range" id="liftSpeed" min="0.1" max="2.0" step="0.05" value="0.4" />
+  </div>
+  <div class="slider">
+    <label>이동 속도 (m/s) <span class="val" id="moveSpeedVal">0.5</span></label>
+    <input type="range" id="moveSpeed" min="0.1" max="2.0" step="0.05" value="0.5" />
+  </div>
+  <div class="slider">
+    <label>경품 무게 (kg) <span class="val" id="prizeMassVal">0.20</span></label>
+    <input type="range" id="prizeMass" min="0.05" max="1.5" step="0.05" value="0.20" />
+  </div>
+  <div class="slider">
+    <label>경품 개수 <span class="val" id="prizeCountVal">12</span></label>
+    <input type="range" id="prizeCount" min="3" max="40" step="1" value="12" />
+  </div>
+
+  <h2>설정 (페이아웃 모드)</h2>
+  <label class="checkbox">
+    <input type="checkbox" id="assistEnabled" />
+    アシスト 모드 활성화
+  </label>
+  <div class="slider">
+    <label>아암 힘 (assist 발동 시) <span class="val" id="assistForceVal">8.0</span></label>
+    <input type="range" id="assistForce" min="0.1" max="15" step="0.1" value="8.0" />
+  </div>
+  <div class="slider">
+    <label>aassist 발동 회수 (N회 실패 후) <span class="val" id="assistAfterVal">10</span></label>
+    <input type="range" id="assistAfter" min="1" max="30" step="1" value="10" />
+  </div>
+
+  <h2>통계 (현재 세션)</h2>
+  <div class="row"><span>플레이 횟수</span> <span class="v" id="statPlays">0</span></div>
+  <div class="row"><span>획득 횟수</span> <span class="v" id="statWins">0</span></div>
+  <div class="row"><span>회수율</span> <span class="v" id="statRate">0.0%</span></div>
+  <div class="row"><span>마지막 결과</span> <span class="v" id="statLast">—</span></div>
+  <div class="button-row">
+    <button id="btn-reset" class="ghost">통계 리셋</button>
+  </div>
+</aside>
+
+<div id="help">
+  <kbd>↑↓</kbd> 앞뒤 · <kbd>←→</kbd> 좌우 · <kbd>Space</kbd> 드롭 · 마우스 드래그: 카메라
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+    "cannon-es": "https://unpkg.com/cannon-es@0.20.0/dist/cannon-es.js"
+  }
+}
+</script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
